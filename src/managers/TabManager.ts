@@ -1,4 +1,4 @@
-import { BaseWindow, WebContentsView, Menu } from 'electron';
+import { BaseWindow, WebContentsView, Menu, clipboard } from 'electron';
 import { ManagedTab, TabData, SessionTab, CONFIG, IPC } from '../types';
 import { AppDatabase } from '../database/Database';
 import { DownloadManager } from './DownloadManager';
@@ -71,7 +71,7 @@ export class TabManager {
         sandbox: true,
       },
     });
-    this.controlsView.setBackgroundColor('#1b1b1b');
+    this.controlsView.setBackgroundColor(CONFIG.WINDOW.BG_COLOR);
     this.controlsView.webContents.loadURL(TabManager.buildControlsHTML());
     // Add at z-index 2 — ABOVE content (1), BELOW sidebar (added last = highest)
     this.mainWindow.contentView.addChildView(this.controlsView, 2);
@@ -118,7 +118,7 @@ export class TabManager {
 <html><head><style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body {
-    background: #1b1b1b;
+    background: ${CONFIG.WINDOW.BG_COLOR};
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -621,7 +621,7 @@ export class TabManager {
               this.switchToTab(t.id);
             }
           },
-          { label: 'Copy Link Address', click: () => require('electron').clipboard.writeText(params.linkURL) },
+          { label: 'Copy Link Address', click: () => clipboard.writeText(params.linkURL) },
           { type: 'separator' },
         );
       }
@@ -726,7 +726,7 @@ export class TabManager {
           width: width - this.sidebarWidth - g * 2,
           height: height - g * 2,
         });
-        try { activeTab.view.setBorderRadius(TabManager.CONTENT_RADIUS); } catch { }
+        try { activeTab.view.setBorderRadius(TabManager.CONTENT_RADIUS); } catch { /* older Electron */ }
       }
       this.sidebarView.setBounds({ x: 0, y: 0, width: this.sidebarWidth + g, height });
     } else {
@@ -738,7 +738,7 @@ export class TabManager {
           width: width - this.sidebarWidth - g * 2,
           height: height - g * 2,
         });
-        try { activeTab.view.setBorderRadius(TabManager.CONTENT_RADIUS); } catch { }
+        try { activeTab.view.setBorderRadius(TabManager.CONTENT_RADIUS); } catch { /* older Electron */ }
       }
     }
   }
@@ -760,7 +760,7 @@ export class TabManager {
       this.animTimer = null;
     }
 
-    const { width, height } = this.mainWindow.getContentBounds();
+    const { width } = this.mainWindow.getContentBounds();
     const g = TabManager.CONTENT_INSET;
     const T = TabManager.TOOLBAR_HEIGHT;
 
@@ -786,7 +786,8 @@ export class TabManager {
       this.controlsView.setBounds({ x: contentX, y: 0, width: contentW, height: h });
 
       if (frame >= totalFrames) {
-        clearInterval(this.animTimer!);
+        const timer = this.animTimer;
+        if (timer) clearInterval(timer);
         this.animTimer = null;
         this.currentControlsH = targetH;
         this.controlsView.setBounds({ x: contentX, y: 0, width: contentW, height: targetH });

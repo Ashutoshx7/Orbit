@@ -2,7 +2,6 @@ import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
-import { MakerRpm } from '@electron-forge/maker-rpm';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
@@ -103,16 +102,7 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({}),
     new MakerZIP({}, ['darwin']),
-    new MakerRpm({
-      options: {
-        name: 'astra',
-        productName: 'Astra',
-        description: 'Fast, private, and beautiful web browser',
-        homepage: 'https://github.com/ashutoshx7/Astra',
-        categories: ['Network', 'WebBrowser'],
-        license: 'MIT',
-      },
-    }),
+    // RPM maker removed to avoid requiring `rpmbuild` on this system.
     new MakerDeb({
       options: {
         name: 'astra',

@@ -1,4 +1,5 @@
 import { BaseWindow, WebContentsView } from 'electron';
+import { CONFIG } from '../types';
 
 /**
  * CompactModeManager - Zen-exact sidebar auto-hide.
@@ -20,7 +21,7 @@ import { BaseWindow, WebContentsView } from 'electron';
 
 export type CompactMode = 'expanded' | 'hidden';
 
-const BG_COLOR = '#1b1b1b';
+const BG_COLOR = CONFIG.WINDOW.BG_COLOR;
 const TRANSPARENT = '#00000000';
 const EDGE_WIDTH = 12;
 const HIDE_DELAY_MS = 300;
@@ -51,7 +52,9 @@ export class CompactModeManager {
   }
   setBaseWidth(w: number): void { this.baseWidth = w; }
   getBaseWidth(): number { return this.baseWidth; }
-  setResizing(_r: boolean): void {}
+  setResizing(_r: boolean): void {
+    void _r;
+  }
 
   // ==== Toggle ====
 
@@ -67,12 +70,12 @@ export class CompactModeManager {
       this.layoutCallback(0);
 
       // Sidebar slides out via CSS
+      this.sidebarView.setBackgroundColor(TRANSPARENT);
       this.sidebarToFront();
       this.sendState('hiding');
 
       this.animTimer = setTimeout(() => {
         this.animTimer = null;
-        this.sidebarView.setBackgroundColor(TRANSPARENT);
         this.shrinkToEdge();
         this.cooldownUntil = Date.now() + COOLDOWN_MS;
         this.sendState();
@@ -96,7 +99,7 @@ export class CompactModeManager {
       // Compact mode, sidebar hidden → exit compact mode, restore layout
       this.mode = 'expanded';
       this.overlayVisible = false;
-      this.sidebarView.setBackgroundColor(BG_COLOR);
+      this.sidebarView.setBackgroundColor(TRANSPARENT);
       this.setSidebarFull();
       this.sidebarToFront();
 
@@ -108,13 +111,14 @@ export class CompactModeManager {
         // NOW move content (after sidebar is fully visible)
         this.sidebarToBack();
         this.layoutCallback(this.baseWidth);
+        this.sidebarView.setBackgroundColor(BG_COLOR);
         this.sendState();
         console.log('[Astra] sidebar: compact mode off');
       }, ANIM_MS);
     }
   }
 
-  setMode(m: any): void {
+  setMode(m: CompactMode | 'full' | string): void {
     this.clearAll();
     if (m === 'expanded' || m === 'full') {
       this.mode = 'expanded';
@@ -166,10 +170,18 @@ export class CompactModeManager {
   }
 
   onEdgeCancelHide(): void { this.clearHideTimer(); }
-  handleMouseMove(): void {}
-  flashSidebar(): void {}
-  lockForPopup(): void {}
-  unlockFromPopup(): void {}
+  handleMouseMove(): void {
+    return;
+  }
+  flashSidebar(): void {
+    return;
+  }
+  lockForPopup(): void {
+    return;
+  }
+  unlockFromPopup(): void {
+    return;
+  }
 
   // ==== View helpers ====
 
@@ -188,7 +200,9 @@ export class CompactModeManager {
       const p = this.mainWindow.contentView;
       p.removeChildView(this.sidebarView);
       p.addChildView(this.sidebarView);
-    } catch {}
+    } catch {
+      /* view may already be detached during window teardown */
+    }
   }
 
   private sidebarToBack(): void {
@@ -196,7 +210,9 @@ export class CompactModeManager {
       const p = this.mainWindow.contentView;
       p.removeChildView(this.sidebarView);
       p.addChildView(this.sidebarView, 0);
-    } catch {}
+    } catch {
+      /* view may already be detached during window teardown */
+    }
   }
 
   // ==== Timers ====

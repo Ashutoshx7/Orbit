@@ -105,6 +105,10 @@ const App: React.FC = () => {
     () => tabs.map((t, i) => ({ ...t, originalIndex: i })).filter((t) => !t.isPinned),
     [tabs]
   );
+  const activeSpace = useMemo(
+    () => spaces.find((space) => space.id === activeSpaceId),
+    [spaces, activeSpaceId]
+  );
 
   // ── Handlers ──────────────────────────────────────
   const handleNavigate = useCallback((e: React.FormEvent) => {
@@ -187,6 +191,9 @@ const App: React.FC = () => {
   return (
     <div
       className={sidebarClasses}
+      style={{
+        '--active-space-color': activeSpace?.color || '#4f52ff',
+      } as React.CSSProperties}
       ref={sidebarRef}
       onClick={() => setSpaceContextMenu(null)}
       onMouseEnter={handleMouseEnter}
@@ -326,7 +333,7 @@ const App: React.FC = () => {
       {/* Sidebar resize handle */}
       <div
         className={`sidebar-resize-handle ${isResizing ? 'active' : ''}`}
-        onMouseDown={handleResizeMouseDown}
+        onPointerDown={handleResizeMouseDown}
       />
     </div>
   );

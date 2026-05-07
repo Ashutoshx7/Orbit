@@ -34,7 +34,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
         <div
           key={space.id}
           className={`space-icon ${space.id === activeSpaceId ? 'active' : ''}`}
-          style={{ '--space-color': space.color } as React.CSSProperties}
+          style={{ '--space-color': space.color || '#4f52ff' } as React.CSSProperties}
           onClick={() => onSwitchSpace(space.id)}
           onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); onSpaceContextMenu(e, space.id); }}
           title={space.name}

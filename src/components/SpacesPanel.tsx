@@ -32,6 +32,7 @@ const SpacesPanel: React.FC<SpacesPanelProps> = ({
           <div
             key={space.id}
             className={`space-card ${space.id === activeSpaceId ? 'active' : ''}`}
+            style={{ '--space-color': space.color || '#4f52ff' } as React.CSSProperties}
             onClick={() => onSwitchSpace(space.id)}
           >
             <div

@@ -181,7 +181,7 @@ export const CONFIG = {
     HEIGHT: 800,
     MIN_WIDTH: 800,
     MIN_HEIGHT: 600,
-    BG_COLOR: '#1b1b1b',
+    BG_COLOR: '#1a1a4e',
     TITLE: 'Astra',
   },
 } as const;
