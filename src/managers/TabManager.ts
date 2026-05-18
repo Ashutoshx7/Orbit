@@ -5,6 +5,8 @@ import { DownloadManager } from './DownloadManager';
 import { getNewTabPageUrl } from '../pages/newtab';
 import type { SpaceManager } from './SpaceManager';
 
+type SidebarLayoutEasing = 'easeIn' | 'easeOut';
+
 /**
  * TabManager — owns the lifecycle of all browser tabs.
  *
@@ -731,7 +733,11 @@ export class TabManager {
    * sidebar BrowserView bounds during dock/undock so the two animations do not
    * fight each other.
    */
-  animateContentForSidebarWidth(sidebarWidth: number, durationMs: number): void {
+  animateContentForSidebarWidth(
+    sidebarWidth: number,
+    durationMs: number,
+    easing: SidebarLayoutEasing = 'easeOut',
+  ): void {
     this.cancelSidebarLayoutAnimation();
 
     const targetWidth = this.clampSidebarWidth(sidebarWidth);
@@ -744,21 +750,18 @@ export class TabManager {
     }
 
     const frameInterval = 1000 / TabManager.ANIM_FPS;
-    const totalFrames = Math.max(1, Math.round(durationMs / frameInterval));
-    const intervalMs = durationMs / totalFrames;
-    let frame = 0;
+    const startedAt = Date.now();
 
     this.sidebarLayoutTimer = setInterval(() => {
-      frame++;
-      const t = Math.min(frame / totalFrames, 1);
-      const eased = 1 - Math.pow(1 - t, 3);
+      const t = Math.min((Date.now() - startedAt) / durationMs, 1);
+      const eased = this.easeSidebarLayout(t, easing);
       this.applyContentSidebarWidth(startWidth + deltaWidth * eased);
 
-      if (frame >= totalFrames) {
+      if (t >= 1) {
         this.cancelSidebarLayoutAnimation();
         this.applyContentSidebarWidth(targetWidth);
       }
-    }, intervalMs);
+    }, frameInterval);
   }
 
   private clampSidebarWidth(width: number): number {
@@ -801,6 +804,11 @@ export class TabManager {
     if (!this.sidebarLayoutTimer) return;
     clearInterval(this.sidebarLayoutTimer);
     this.sidebarLayoutTimer = null;
+  }
+
+  private easeSidebarLayout(t: number, easing: SidebarLayoutEasing): number {
+    if (easing === 'easeIn') return t * t;
+    return 1 - Math.pow(1 - t, 3);
   }
 
   /**

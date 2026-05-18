@@ -30,6 +30,7 @@ const HOVER_RECHECK_MS = 0;
 const TOGGLE_IGNORE_HOVER_MS = 180;
 
 type SidebarAnimation = 'hiding' | 'showing';
+type LayoutEasing = 'easeIn' | 'easeOut';
 type PointerPosition = { x: number; y: number };
 
 export class CompactModeManager {
@@ -51,7 +52,11 @@ export class CompactModeManager {
     private readonly mainWindow: BaseWindow,
     private readonly sidebarView: WebContentsView,
     private readonly layoutCallback: (sidebarWidth: number) => void,
-    private readonly animateLayoutCallback?: (sidebarWidth: number, durationMs: number) => void,
+    private readonly animateLayoutCallback?: (
+      sidebarWidth: number,
+      durationMs: number,
+      easing: LayoutEasing,
+    ) => void,
   ) {}
 
   getMode(): CompactMode { return this.mode; }
@@ -191,7 +196,7 @@ export class CompactModeManager {
       this.shrinkToEdge();
       this.sendState();
     });
-    this.animateLayout(0);
+    this.animateLayout(0, 'easeIn');
   }
 
   private exitCompactMode(): void {
@@ -220,7 +225,7 @@ export class CompactModeManager {
         this.sendState();
       });
     }
-    this.animateLayout(this.baseWidth);
+    this.animateLayout(this.baseWidth, 'easeOut');
   }
 
   private showOverlay(userShow = false): void {
@@ -332,9 +337,9 @@ export class CompactModeManager {
     this.clearAnimationTimer();
   }
 
-  private animateLayout(sidebarWidth: number): void {
+  private animateLayout(sidebarWidth: number, easing: LayoutEasing): void {
     if (this.animateLayoutCallback) {
-      this.animateLayoutCallback(sidebarWidth, ANIM_MS);
+      this.animateLayoutCallback(sidebarWidth, ANIM_MS, easing);
       return;
     }
 

@@ -109,8 +109,8 @@ function createWindow(): void {
   // Hover keeps content full width; explicit toggle animates dock/undock layout.
   compactMode = new CompactModeManager(mainWindow, sidebarView, (sidebarWidth) => {
     tabManager.layoutWithSidebarWidth(sidebarWidth);
-  }, (sidebarWidth, durationMs) => {
-    tabManager.animateContentForSidebarWidth(sidebarWidth, durationMs);
+  }, (sidebarWidth, durationMs, easing) => {
+    tabManager.animateContentForSidebarWidth(sidebarWidth, durationMs, easing);
   });
 
   // Glance: link preview overlay
